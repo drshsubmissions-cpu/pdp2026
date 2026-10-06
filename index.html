@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>PDP 2026 Portal</title>
+<style>
+body{margin:0;font-family:"Noto Sans",Arial,sans-serif;background:#f6f7f8;color:#1d2a33}
+.box{max-width:420px;margin:30vh auto 0;padding:0 16px;text-align:center;font-size:16px;line-height:1.5}
+button{margin-top:12px;padding:10px 18px;font-size:15px;border:0;border-radius:6px;background:#1f5f6b;color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box" id="msg">Opening the PDP 2026 Portal…</div>
+<script>
+// Loads the current portal page straight from the portal, without sending any Google account.
+// This avoids Google's "several signed-in accounts" error. This file never needs changing.
+(function(){
+  var EXEC='https://script.google.com/macros/s/AKfycbzeZRb3VhtdpBHnwKnGMY_GuRH5e_0Pq7OmIGuZSWlRIGp1IN7WrMzVZR3xc_BLh14t/exec';
+  function fail(){
+    document.getElementById('msg').innerHTML='The portal did not open. Check your internet connection.<br><button onclick="location.reload()">Try again</button>';
+  }
+  fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw 0; return r.text(); })
+    .then(function(html){
+      if(html.indexOf('PDP')<0||html.indexOf('<html')<0) throw 0;
+      document.open(); document.write(html); document.close();
+    })
+    .catch(fail);
+})();
+</script>
+</body>
+</html>
