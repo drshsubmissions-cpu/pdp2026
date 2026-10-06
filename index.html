@@ -13,20 +13,23 @@ button{margin-top:12px;padding:10px 18px;font-size:15px;border:0;border-radius:6
 <body>
 <div class="box" id="msg">Opening the PDP 2026 Portal…</div>
 <script>
-// Loads the current portal page straight from the portal, without sending any Google account.
-// This avoids Google's "several signed-in accounts" error. This file never needs changing.
+// Loads the portal page straight from the portal, without sending any Google account
+// (this avoids Google's "several signed-in accounts" error). The page is kept in this browser,
+// so later visits open at once; a fresh copy is fetched each time and used from the next visit.
 (function(){
   var EXEC='https://script.google.com/macros/s/AKfycbzeZRb3VhtdpBHnwKnGMY_GuRH5e_0Pq7OmIGuZSWlRIGp1IN7WrMzVZR3xc_BLh14t/exec';
+  var KEY='pdp26_page', saved=null;
+  try{ saved=localStorage.getItem(KEY); }catch(e){}
+  function good(html){ return html && html.indexOf('PDP')>=0 && html.indexOf('<html')>=0; }
+  function show(html){ document.open(); document.write(html); document.close(); }
   function fail(){
     document.getElementById('msg').innerHTML='The portal did not open. Check your internet connection.<br><button onclick="location.reload()">Try again</button>';
   }
-  fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
+  var latest=fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
     .then(function(r){ if(!r.ok) throw 0; return r.text(); })
-    .then(function(html){
-      if(html.indexOf('PDP')<0||html.indexOf('<html')<0) throw 0;
-      document.open(); document.write(html); document.close();
-    })
-    .catch(fail);
+    .then(function(html){ if(!good(html)) throw 0; try{ localStorage.setItem(KEY,html); }catch(e){} return html; });
+  if(good(saved)){ latest.catch(function(){}); show(saved); }
+  else latest.then(show).catch(fail);
 })();
 </script>
 </body>
