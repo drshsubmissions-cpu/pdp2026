@@ -25,9 +25,17 @@ button{margin-top:12px;padding:10px 18px;font-size:15px;border:0;border-radius:6
   function fail(){
     document.getElementById('msg').innerHTML='The portal did not open. Check your internet connection.<br><button onclick="location.reload()">Try again</button>';
   }
-  var latest=fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
-    .then(function(r){ if(!r.ok) throw 0; return r.text(); })
-    .then(function(html){ if(!good(html)) throw 0; try{ localStorage.setItem(KEY,html); }catch(e){} return html; });
+  // Google's relay sometimes drops a reply, so try up to 4 times.
+  function get(n){
+    return fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw 0; return r.text(); })
+      .then(function(html){ if(!good(html)) throw 0; return html; })
+      .catch(function(){
+        if(n>=4) throw 0;
+        return new Promise(function(res){ setTimeout(res,700*n); }).then(function(){ return get(n+1); });
+      });
+  }
+  var latest=get(1).then(function(html){ try{ localStorage.setItem(KEY,html); }catch(e){} return html; });
   if(good(saved)){ latest.catch(function(){}); show(saved); }
   else latest.then(show).catch(fail);
 })();
