@@ -2,60 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDP 2026 Portal</title>
-<style>
-body{margin:0;font-family:"Noto Sans",Arial,sans-serif;background:#f6f7f8;color:#1d2a33}
-.box{max-width:420px;margin:30vh auto 0;padding:0 16px;text-align:center;font-size:16px;line-height:1.5}
-button{margin-top:12px;padding:10px 18px;font-size:15px;border:0;border-radius:6px;background:#1f5f6b;color:#fff;cursor:pointer}
-</style>
+<!-- The portal now runs on its own server. This page only sends visitors there at once. -->
+<meta http-equiv="refresh" content="0; url=https://pdp.srv1499263.hstgr.cloud/">
+<script>location.replace('https://pdp.srv1499263.hstgr.cloud/');</script>
 </head>
-<body>
-<div class="box" id="msg">Opening the PDP 2026 Portal…</div>
-<script>
-// Loads the portal page straight from the portal, without sending any Google account
-// (this avoids Google's "several signed-in accounts" error). The page is kept in this browser,
-// so later visits open at once.
-// Speed: we first ask the portal for its version only (?v=1, a few bytes). If the saved page
-// already has that version, it is shown immediately and the full page is NOT downloaded again.
-// The full page is fetched only when the version changed (i.e. after an update).
-(function(){
-  var EXEC='https://script.google.com/macros/s/AKfycbz4csLmuJqaOfla_sk0HBQo6gWWMGb3IouXiQT8nHrMcUQ8kqRuwK42NMoaO_GWBXHx/exec';
-  var KEY='pdp26_page', VKEY='pdp26_ver', saved=null, sver=null;
-  try{ saved=localStorage.getItem(KEY); sver=localStorage.getItem(VKEY); }catch(e){}
-  function good(html){ return html && html.indexOf('PDP')>=0 && html.indexOf('<html')>=0; }
-  function verOf(html){ var m=/pdp-ver" content="([^"]+)"/.exec(html||''); return m?m[1]:null; }
-  function show(html){ document.open(); document.write(html); document.close(); }
-  function fail(){
-    document.getElementById('msg').innerHTML='The portal did not open. Check your internet connection.<br><button onclick="location.reload()">Try again</button>';
-  }
-  // Google's relay sometimes drops a reply, so try up to 4 times.
-  function get(n){
-    return fetch(EXEC+'?raw=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
-      .then(function(r){ if(!r.ok) throw 0; return r.text(); })
-      .then(function(html){ if(!good(html)) throw 0; return html; })
-      .catch(function(){
-        if(n>=4) throw 0;
-        return new Promise(function(res){ setTimeout(res,700*n); }).then(function(){ return get(n+1); });
-      });
-  }
-  fetch(EXEC+'?v=1&t='+Date.now(),{credentials:'omit',redirect:'follow',cache:'no-store'})
-    .then(function(r){ if(!r.ok) throw 0; return r.text(); })
-    .then(function(v){
-      v=String(v||'').trim();
-      // Saved page exists and matches the live version: show it, no 128 KB download.
-      if(good(saved) && sver && sver===v){ show(saved); return; }
-      get(1).then(function(html){
-        try{ localStorage.setItem(KEY,html); localStorage.setItem(VKEY,verOf(html)||v); }catch(e){}
-        show(html);
-      }).catch(fail);
-    })
-    .catch(function(){
-      // Version check failed (network): fall back to the saved page, else fetch the full page.
-      if(good(saved)) show(saved);
-      else get(1).then(show).catch(fail);
-    });
-})();
-</script>
+<body style="font-family:Arial,sans-serif;text-align:center;margin-top:30vh">
+Opening the PDP 2026 Portal... <a href="https://pdp.srv1499263.hstgr.cloud/">Open</a>
 </body>
 </html>
